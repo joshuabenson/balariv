@@ -59,6 +59,7 @@
 		-->
 
 		<script src="js/ThreeTerrain.js"></script>
+
 		<script src="js/Detector.js"></script>
 		<script src="js/RequestAnimationFrame.js"></script>
 		<script src="js/Stats.js"></script>
@@ -413,8 +414,8 @@
 				quadTarget.position.z = -500;
 				sceneRenderTarget.addObject( quadTarget );
 
-				// TERRAIN MESH
-
+				// TERRAIN MESHc
+				// Sets the dimentions of the terrain:
 				var geometryTerrain = new THREE.PlaneGeometry( 6000, 6000, 256, 256 );
 				geometryTerrain.computeFaceNormals();
 				geometryTerrain.computeVertexNormals();
