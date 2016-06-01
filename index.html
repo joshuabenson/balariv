@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html lang="en">
 	<head>
-		<title>Balari V - All Men Women Bisexual Transgender Questioning's Sky</title>
+		<title>Balari V - All People's Sky</title>
 		<meta charset="utf-8">
 		<style type="text/css">
 			body {
@@ -26,6 +26,10 @@
 			#loading { width: 100%; margin: 2em auto; text-align: center; position: absolute; top: 25em  }
 
 			#oldie a { color:#da0 }
+
+			.attribution {
+				font-size: 8pt
+			}
 		</style>
 	</head>
 
@@ -46,7 +50,13 @@
 		-->	
 
 			<div class="c">
-			toggle randomize terrain: <span class="h">m</span>
+				<span class="h">m</span> toggles randomize terrain
+			</div>
+			<div class="c">
+				move with <span class="h">w a s d</span> or arrow keys
+			</div>
+			<div class="attribution">
+				Adapted from <a href='http://alteredqualia.com/three/examples/webgl_terrain_dynamic.html'>alteredqualia.com/three/examples/webgl_terrain_dynamic.html</a>
 			</div>
 		<!--	
 			<div class="c">
@@ -226,7 +236,7 @@ n += 0.015625 * abs( snoise( coord * 64.0 ) );
 
 			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
-			var MARGIN = 50;
+			var MARGIN = 75;
 
 			var SCREEN_WIDTH = window.innerWidth;
 			var SCREEN_HEIGHT = window.innerHeight - 2 * MARGIN;
@@ -288,17 +298,16 @@ n += 0.015625 * abs( snoise( coord * 64.0 ) );
 
 				scene = new THREE.Scene();
 
-				scene.fog = new THREE.Fog( 0x7FFFD4, 8000, 10000 );
+				scene.fog = new THREE.Fog( 0xFFFF00, 9000, 15000 );
 				scene.fog.color.setHSV( 0.102, 0.9, 0.825 );
 
-				camera = new THREE.PerspectiveCamera( 40, SCREEN_WIDTH / SCREEN_HEIGHT, 2, 48000 );
-				camera.position.set( -15500, 390, -2000 );
-				var b = new THREE.Vector3( -800, 100, -200 );
-				camera.lookAt(b);
+				camera = new THREE.PerspectiveCamera( 100, SCREEN_WIDTH / SCREEN_HEIGHT, 2, 48000 );
+				camera.position.set( -15500, 490, -2000 );
+				// var b = new THREE.Vector3( -800, 100, -200 );
+				// camera.lookAt(b);
 				scene.add( camera );
 				camera.updateProjectionMatrix();
 			  camControls = new THREE.FirstPersonControls(camera);
-
 			  camControls.lookSpeed = 0.1;
         camControls.movementSpeed = 1000;
         camControls.noFly = true;
@@ -408,13 +417,13 @@ n += 0.015625 * abs( snoise( coord * 64.0 ) );
 
 				uniformsTerrain[ "uDiffuseColor" ].value.setHex( 0xffffff );
 				uniformsTerrain[ "uSpecularColor" ].value.setHex( 0xffffff );
-				uniformsTerrain[ "uAmbientColor" ].value.setHex( 0x111111 );
+				uniformsTerrain[ "uAmbientColor" ].value.setHex( 0x336633 );
 
-				uniformsTerrain[ "uShininess" ].value = 60;
+				uniformsTerrain[ "uShininess" ].value = 500;
 
 				uniformsTerrain[ "uDisplacementScale" ].value = 475;
 
-				uniformsTerrain[ "uRepeatOverlay" ].value.set( 96, 96 );
+				uniformsTerrain[ "uRepeatOverlay" ].value.set( 300, 300 );
 
 				var params = [
 								[ 'heightmap', 	document.getElementById( 'fragmentShaderNoise' ).textContent, 	vertexShader, uniformsNoise, false ],
@@ -617,7 +626,7 @@ n += 0.015625 * abs( snoise( coord * 64.0 ) );
 					morphColorsToFaceColors( geometry );
 					addMorph( geometry, 500, 1000, startX - Math.random() * 500, 350, 40, true );
 					for (var i = 0; i < 200; i++) {
-						addMorph( geometry, 500, 1000, startX - Math.random() * 5000, Math.random() * 4000, Math.random() * 1000, true );
+						addMorph( geometry, 500, 1000, startX - Math.random() * 15000, Math.random() * 4000, Math.random() * 1000, true );
 					}
 					for (var i = 0; i < 500; i++) {
 						addMorph( geometry, 500, 1000, Math.random() * 40000, Math.random()*800, Math.random() * 40000);
@@ -746,7 +755,7 @@ n += 0.015625 * abs( snoise( coord * 64.0 ) );
 
 					var time = Date.now() * 0.001;
 
-					var fLow = -0.4, fHigh = 15.825;
+					var fLow = 0.4, fHigh = 15.825;
 
 					lightVal = THREE.Math.clamp( lightVal + 0.5 * delta * lightDir, fLow, fHigh );
 
