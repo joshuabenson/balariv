@@ -43,11 +43,12 @@
 		<div class="c">
 			day / night: <span class="h">n</span>
 			</div>
+		-->	
 
 			<div class="c">
-			animate terrain: <span class="h">m</span>
+			toggle randomize terrain: <span class="h">m</span>
 			</div>
-
+		<!--	
 			<div class="c">
 			toggle soundtrack: <span class="h">b</span>
 			</div>
@@ -57,7 +58,7 @@
 			<source src="sounds/Five_Armies.ogg" type='audio/ogg'>
 		</audio>
 		-->
-
+		</div>
 		<script src="js/ThreeTerrain.js"></script>
 
 		<script src="js/Detector.js"></script>
@@ -409,11 +410,11 @@ n += 0.015625 * abs( snoise( coord * 64.0 ) );
 				uniformsTerrain[ "uSpecularColor" ].value.setHex( 0xffffff );
 				uniformsTerrain[ "uAmbientColor" ].value.setHex( 0x111111 );
 
-				uniformsTerrain[ "uShininess" ].value = 30;
+				uniformsTerrain[ "uShininess" ].value = 60;
 
-				uniformsTerrain[ "uDisplacementScale" ].value = 375;
+				uniformsTerrain[ "uDisplacementScale" ].value = 475;
 
-				uniformsTerrain[ "uRepeatOverlay" ].value.set( 6, 6 );
+				uniformsTerrain[ "uRepeatOverlay" ].value.set( 96, 96 );
 
 				var params = [
 								[ 'heightmap', 	document.getElementById( 'fragmentShaderNoise' ).textContent, 	vertexShader, uniformsNoise, false ],
@@ -744,19 +745,19 @@ n += 0.015625 * abs( snoise( coord * 64.0 ) );
 
 					var time = Date.now() * 0.001;
 
-					var fLow = -0.4, fHigh = 50.825;
+					var fLow = 0.1, fHigh = 0.825;
 
 					lightVal = THREE.Math.clamp( lightVal + 0.5 * delta * lightDir, fLow, fHigh );
 
 					var valNorm = ( lightVal - fLow ) / ( fHigh - fLow );
 
 					var sat = THREE.Math.mapLinear( valNorm, 0, 1, 0.95, 0.25 );
-					scene.fog.color.setHSV( 0.1, sat, lightVal );
+					scene.fog.color.setHSV( 0.9, sat, lightVal );
 
 					renderer.setClearColor( scene.fog.color, 1 );
 
 					spotLight.intensity = THREE.Math.mapLinear( valNorm, 0, 1, 0.1, 1.15 );
-					pointLight.intensity = THREE.Math.mapLinear( valNorm, 0, 1, 0.9, 1.5 );
+					pointLight.intensity = THREE.Math.mapLinear( valNorm, 0, 1, 0.9, 0.45 );
 
 					uniformsTerrain[ "uNormalScale" ].value = THREE.Math.mapLinear( valNorm, 0, 1, 0.6, 10.5 );
 
