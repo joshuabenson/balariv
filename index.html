@@ -222,7 +222,7 @@
 
 			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
-			var MARGIN = 100;
+			var MARGIN = 50;
 
 			var SCREEN_WIDTH = window.innerWidth;
 			var SCREEN_HEIGHT = window.innerHeight - 2 * MARGIN;
@@ -251,6 +251,8 @@
 			var morph, morphs = [];
 
 			var morphAnimateOnly = [];
+
+			var morphStill = [];
 
 			var updateNoise = true;
 
@@ -286,7 +288,7 @@
 				scene.fog.color.setHSV( 0.102, 0.9, 0.825 );
 
 				camera = new THREE.PerspectiveCamera( 40, SCREEN_WIDTH / SCREEN_HEIGHT, 2, 48000 );
-				camera.position.set( -15500, 490, -2000 );
+				camera.position.set( -15500, 390, -2000 );
 				var b = new THREE.Vector3( -800, 100, -200 );
 				camera.lookAt(b);
 				scene.add( camera );
@@ -440,14 +442,14 @@
 
 				// TERRAIN MESH
 				// Sets the dimentions of the terrain
-				var geometryTerrain = new THREE.PlaneGeometry( 48000, 48000, 512, 512 );
+				var geometryTerrain = new THREE.PlaneGeometry( 96000, 48000, 256, 256 );
 				geometryTerrain.computeFaceNormals();
 				geometryTerrain.computeVertexNormals();
 				geometryTerrain.computeTangents();
 				// Add the terrain to the scene
 				terrain = new THREE.Mesh( geometryTerrain, mlib[ "terrain" ] );
 				terrain.rotation.set( -Math.PI/2, 0, 0 );
-				terrain.position.set( 0, -125, 0 );
+				terrain.position.set( 2000, -125, 0 );
 				terrain.visible = false;
 				scene.add( terrain );
 
@@ -501,7 +503,7 @@
 				hblur = new THREE.ShaderPass( THREE.ShaderExtras[ "horizontalTiltShift" ] );
 				vblur = new THREE.ShaderPass( THREE.ShaderExtras[ "verticalTiltShift" ] );
 
-				var bluriness = 0;
+				var bluriness = 1;
 
 				hblur.uniforms[ 'h' ].value = bluriness / SCREEN_WIDTH;
 				vblur.uniforms[ 'v' ].value = bluriness / SCREEN_HEIGHT;
@@ -546,10 +548,14 @@
 
 					scene.add( meshAnim );
 					// Changed so conditionally adding morphs to array that updates their position
-					if (movement) morphs.push( meshAnim );
-					if (animation) morphAnimateOnly.push( meshAnim );
+					if (movement) {
+						morphs.push( meshAnim );
+					} else if (animation) {
+						morphAnimateOnly.push( meshAnim );
+					} else {
+						morphStill.push( meshAnim );
+					}	
 					renderer.initWebGLObjects( scene );
-
 				}
 
 				// My great new function
@@ -607,7 +613,7 @@
 					morphColorsToFaceColors( geometry );
 					addMorph( geometry, 500, 1000, startX - Math.random() * 500, 350, 40, true );
 					for (var i = 0; i < 200; i++) {
-						addMorph( geometry, 500, 1000, startX - Math.random() * 5000, Math.random() * 4000, 10, true );
+						addMorph( geometry, 500, 1000, startX - Math.random() * 5000, Math.random() * 4000, Math.random() * 1000, true );
 					}
 					for (var i = 0; i < 500; i++) {
 						addMorph( geometry, 500, 1000, Math.random() * 40000, Math.random()*800, Math.random() * 40000);
@@ -780,15 +786,30 @@
 						morph.position.x += morph.speed * delta;
 						// if (i === 0) console.log(morph.position);
 
-						if ( morph.position.x  > 2000 )  {
+
+						if (Math.abs(morph.position.x - camera.position.x) < 400) {
+							morph.updateAnimation( 5000 * delta );
+						}
+
+						if ( morph.position.x  > 48000 )  {
 
 							morph.position.x = -1500 - Math.random() * 500;
 
 						}
 
-
 					}
 
+					for ( var i = 0; i < morphStill.length; i ++ ) {
+
+						morph = morphStill[ i ];
+
+						if (Math.abs(morph.position.x - camera.position.x) < 400) {
+								morph.rotation.x +=  5 * delta;
+								morph.rotation.y +=  1 * delta;
+								morph.rotation.z +=  Math.random() * .5 * delta; 
+						}
+
+					}	
 
 					for ( var i = 0; i < morphAnimateOnly.length; i ++ ) {
 
