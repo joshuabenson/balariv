@@ -66,8 +66,14 @@
 
 		<script src="js/ShaderTerrain.js"></script>
 		<script src="js/ShaderExtrasTerrain.js"></script>
-
+		<script src="js/LoadingManager.js"></script>
 		<script src="js/PostprocessingTerrain.js"></script>
+		<script src="js/TextureLoader.js"></script>
+		<script src="js/SpriteMaterial.js"></script>
+		<script src="js/ImageLoader.js"></script>
+		<!-- // <script src="js/OrbitControls.js"></script>		 -->
+		<script src="js/FirstPersonControls.js"></script>
+		<script src="js/Cache.js"></script>		
 
 		<script id="fragmentShaderNoise" type="x-shader/x-fragment">
 
@@ -223,7 +229,7 @@
 
 			var renderer, container, stats;
 
-			var camera, scene;
+			var camera, camControls, scene;
 			var cameraOrtho, sceneRenderTarget;
 
 			var uniformsNoise, uniformsNormal,
@@ -243,6 +249,8 @@
 			var clock = new THREE.Clock();
 
 			var morph, morphs = [];
+
+			var morphAnimateOnly = [];
 
 			var updateNoise = true;
 
@@ -274,28 +282,44 @@
 
 				scene = new THREE.Scene();
 
-				scene.fog = new THREE.Fog( 0x050505, 2000, 4000 );
+				scene.fog = new THREE.Fog( 0x7FFFD4, 8000, 10000 );
 				scene.fog.color.setHSV( 0.102, 0.9, 0.825 );
 
-				camera = new THREE.PerspectiveCamera( 40, SCREEN_WIDTH / SCREEN_HEIGHT, 2, 4000 );
-				camera.position.set( -1200, 800, 1200 );
-
+				camera = new THREE.PerspectiveCamera( 40, SCREEN_WIDTH / SCREEN_HEIGHT, 2, 48000 );
+				camera.position.set( -15500, 490, -2000 );
+				var b = new THREE.Vector3( -800, 100, -200 );
+				camera.lookAt(b);
 				scene.add( camera );
+				camera.updateProjectionMatrix();
+			  camControls = new THREE.FirstPersonControls(camera);
 
-				controls = new THREE.TrackballControls( camera );
-				controls.target.set( 0, 0, 0 );
+			  camControls.lookSpeed = 0.1;
+        camControls.movementSpeed = 1000;
+        camControls.noFly = true;
+        camControls.lookVertical = true;
+        camControls.constrainVertical = true;
+        camControls.verticalMin = -1.75;
+        camControls.verticalMax = 5.0;
+        camControls.lon = -150;
+        camControls.lat = 150;    
 
-				controls.rotateSpeed = 1.0;
-				controls.zoomSpeed = 1.2;
-				controls.panSpeed = 0.8;
+			  camControls.activeLook = false;
+			  
+			  // camera.lookAt(new THREE.Vector3( -50, -50, -1 ));
 
-				controls.noZoom = false;
-				controls.noPan = false;
+				// controls = new THREE.TrackballControls( camera );
+				// controls.target.set( -2200, 200, 400 );
 
-				controls.staticMoving = false;
-				controls.dynamicDampingFactor = 0.15;
+				// // controls.rotateSpeed = 1.0;
+				// controls.zoomSpeed = 0;
+				// controls.panSpeed = 0;
+				// controls.noZoom = true;
+				// controls.noPan = true;
 
-				controls.keys = [ 65, 83, 68 ];
+				// // controls.staticMoving = false;
+				// controls.dynamicDampingFactor = 0.15;
+
+				// controls.keys = [ 65, 83, 68 ];
 
 				// LIGHTS
 
@@ -414,13 +438,13 @@
 				quadTarget.position.z = -500;
 				sceneRenderTarget.addObject( quadTarget );
 
-				// TERRAIN MESHc
-				// Sets the dimentions of the terrain:
-				var geometryTerrain = new THREE.PlaneGeometry( 6000, 6000, 256, 256 );
+				// TERRAIN MESH
+				// Sets the dimentions of the terrain
+				var geometryTerrain = new THREE.PlaneGeometry( 48000, 48000, 512, 512 );
 				geometryTerrain.computeFaceNormals();
 				geometryTerrain.computeVertexNormals();
 				geometryTerrain.computeTangents();
-
+				// Add the terrain to the scene
 				terrain = new THREE.Mesh( geometryTerrain, mlib[ "terrain" ] );
 				terrain.rotation.set( -Math.PI/2, 0, 0 );
 				terrain.position.set( 0, -125, 0 );
@@ -477,7 +501,7 @@
 				hblur = new THREE.ShaderPass( THREE.ShaderExtras[ "horizontalTiltShift" ] );
 				vblur = new THREE.ShaderPass( THREE.ShaderExtras[ "verticalTiltShift" ] );
 
-				var bluriness = 6;
+				var bluriness = 0;
 
 				hblur.uniforms[ 'h' ].value = bluriness / SCREEN_WIDTH;
 				vblur.uniforms[ 'v' ].value = bluriness / SCREEN_HEIGHT;
@@ -504,7 +528,7 @@
 
 				// MORPHS
 
-				function addMorph( geometry, speed, duration, x, y, z ) {
+				function addMorph( geometry, speed, duration, x, y, z, movement, animation ) {
 
 					var material = new THREE.MeshLambertMaterial( { color: 0xffaa55, morphTargets: true, vertexColors: THREE.FaceColors } );
 
@@ -521,11 +545,29 @@
 					meshAnim.receiveShadow = false;
 
 					scene.add( meshAnim );
-
-					morphs.push( meshAnim );
-
+					// Changed so conditionally adding morphs to array that updates their position
+					if (movement) morphs.push( meshAnim );
+					if (animation) morphAnimateOnly.push( meshAnim );
 					renderer.initWebGLObjects( scene );
 
+				}
+
+				// My great new function
+
+				function addSprite(  ) {
+
+					var map = new THREE.TextureLoader().load( "textures/terrain/grasslight-big.jpg" );
+        	var material = new THREE.SpriteMaterial( { map: map, color: 0xffffff, fog: false } );
+          var sprite = new THREE.Sprite( material );
+
+          sprite.position.set( 200, 350, 40  );
+          // console.log(sprite);
+          // sprite.scale.x = 100;
+          // sprite.scale.y = 100;
+          // sprite.scale.z = 100;
+          scene.add( sprite );
+					// morphs.push( sprite );
+					renderer.initWebGLObjects( scene );
 				}
 
 				function morphColorsToFaceColors( geometry ) {
@@ -547,21 +589,33 @@
 				var loader = new THREE.JSONLoader();
 
 				var startX = -3000;
-
+				// addSprite(  )
+				// addSprite(  )
+				// addSprite(  )
 				loader.load( "models/animated/parrot.js", function( geometry ) {
 
 					morphColorsToFaceColors( geometry );
-					addMorph( geometry, 250, 500, startX -500, 500, 700 );
-					addMorph( geometry, 250, 500, startX - Math.random() * 500, 500, -200 );
-					addMorph( geometry, 250, 500, startX - Math.random() * 500, 500, 200 );
-					addMorph( geometry, 250, 500, startX - Math.random() * 500, 500, 1000 );
+					addMorph( geometry, 250, 500, startX -500, 500, 700, true );
+					addMorph( geometry, 250, 500, startX - Math.random() * 500, 500, -200, true );
+					addMorph( geometry, 250, 500, startX - Math.random() * 500, 500, 200, true );
+					addMorph( geometry, 250, 500, startX - Math.random() * 500, 500, 1000, true );
 
 				} );
 
 				loader.load( "models/animated/flamingo.js", function( geometry ) {
 
 					morphColorsToFaceColors( geometry );
-					addMorph( geometry, 500, 1000, startX - Math.random() * 500, 350, 40 );
+					addMorph( geometry, 500, 1000, startX - Math.random() * 500, 350, 40, true );
+					for (var i = 0; i < 200; i++) {
+						addMorph( geometry, 500, 1000, startX - Math.random() * 5000, Math.random() * 4000, 10, true );
+					}
+					for (var i = 0; i < 500; i++) {
+						addMorph( geometry, 500, 1000, Math.random() * 40000, Math.random()*800, Math.random() * 40000);
+					}
+					for (var i = 0; i < 5; i++) {
+						addMorph( geometry, 500, 1000, Math.random() * 40000, Math.random()*800, Math.random() * 40000, false, true);
+					}
+					addMorph( geometry, 500, 0, -150, 350, 40 );
 
 				} );
 
@@ -676,11 +730,12 @@
 
 				if ( terrain.visible ) {
 
-					controls.update();
+					camControls.update(delta);
+					// controls.update();
 
 					var time = Date.now() * 0.001;
 
-					var fLow = 0.4, fHigh = 0.825;
+					var fLow = -0.4, fHigh = 50.825;
 
 					lightVal = THREE.Math.clamp( lightVal + 0.5 * delta * lightDir, fLow, fHigh );
 
@@ -694,16 +749,16 @@
 					spotLight.intensity = THREE.Math.mapLinear( valNorm, 0, 1, 0.1, 1.15 );
 					pointLight.intensity = THREE.Math.mapLinear( valNorm, 0, 1, 0.9, 1.5 );
 
-					uniformsTerrain[ "uNormalScale" ].value = THREE.Math.mapLinear( valNorm, 0, 1, 0.6, 3.5 );
+					uniformsTerrain[ "uNormalScale" ].value = THREE.Math.mapLinear( valNorm, 0, 1, 0.6, 10.5 );
 
 					if ( updateNoise ) {
 
 						animDelta = THREE.Math.clamp( animDelta + 0.00075 * animDeltaDir, 0, 0.05 );
 						uniformsNoise[ "time" ].value += delta * animDelta;
 
-						uniformsNoise[ "offset" ].value.x += delta * 0.05;
+						// uniformsNoise[ "offset" ].value.x += delta * 0.05;
 
-						uniformsTerrain[ "uOffset" ].value.x = 4 * uniformsNoise[ "offset" ].value.x;
+						// uniformsTerrain[ "uOffset" ].value.x = 4 * uniformsNoise[ "offset" ].value.x;
 
 						quadTarget.material = mlib[ "heightmap" ];
 						renderer.render( sceneRenderTarget, cameraOrtho, heightMap, true );
@@ -723,6 +778,7 @@
 						morph.updateAnimation( 1000 * delta );
 
 						morph.position.x += morph.speed * delta;
+						// if (i === 0) console.log(morph.position);
 
 						if ( morph.position.x  > 2000 )  {
 
@@ -730,6 +786,15 @@
 
 						}
 
+
+					}
+
+
+					for ( var i = 0; i < morphAnimateOnly.length; i ++ ) {
+
+						morph = morphAnimateOnly[ i ];
+
+						morph.updateAnimation( 1000 * delta );
 
 					}
 
