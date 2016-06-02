@@ -350,31 +350,32 @@ n += 0.015625 * abs( snoise( coord * 64.0 ) );
 				scene.add( pointLight );
 
 
-				// HEIGHT + NORMAL MAPS
+		
+        // HEIGHT + NORMAL MAPS
 
-				var normalShader = THREE.ShaderExtras[ 'normalmap' ];
+        var normalShader = THREE.ShaderExtras[ 'normalmap' ];
 
-				var rx = 256, ry = 256;
-				var pars = { minFilter: THREE.LinearMipmapLinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBAFormat };
+        var rx = 256, ry = 256;
+        var pars = { minFilter: THREE.LinearMipmapLinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBAFormat };
 
-				heightMap  = new THREE.WebGLRenderTarget( rx, ry, pars );
-				normalMap = new THREE.WebGLRenderTarget( rx, ry, pars );
+        heightMap  = new THREE.WebGLRenderTarget( rx, ry, pars );
+        normalMap = new THREE.WebGLRenderTarget( rx, ry, pars );
 
-				uniformsNoise = {
+        uniformsNoise = {
 
-					time:   { type: "f", value: 1.0 },
-					scale:  { type: "v2", value: new THREE.Vector2( 1.5, 1.5 ) },
-					offset: { type: "v2", value: new THREE.Vector2( 0, 0 ) }
+          time:   { type: "f", value: 1.0 },
+          scale:  { type: "v2", value: new THREE.Vector2( 1.5, 1.5 ) },
+          offset: { type: "v2", value: new THREE.Vector2( 0, 0 ) }
 
-				};
+        };
 
-				uniformsNormal = THREE.UniformsUtils.clone( normalShader.uniforms );
+        uniformsNormal = THREE.UniformsUtils.clone( normalShader.uniforms );
 
-				uniformsNormal.height.value = 0.05;
-				uniformsNormal.resolution.value.set( rx, ry );
-				uniformsNormal.heightMap.texture = heightMap;
+        uniformsNormal.height.value = 0.05;
+        uniformsNormal.resolution.value.set( rx, ry );
+        uniformsNormal.heightMap.texture = heightMap;
 
-				var vertexShader = document.getElementById( 'vertexShader' ).textContent;
+        var vertexShader = document.getElementById( 'vertexShader' ).textContent;
 
 				// TEXTURES
 
@@ -395,56 +396,57 @@ n += 0.015625 * abs( snoise( coord * 64.0 ) );
 				detailTexture.wrapS = detailTexture.wrapT = THREE.RepeatWrapping;
 				specularMap.wrapS = specularMap.wrapT = THREE.RepeatWrapping;
 
-				// TERRAIN SHADER
+			  // TERRAIN SHADER
 
-				var terrainShader = THREE.ShaderTerrain[ "terrain" ];
+        var terrainShader = THREE.ShaderTerrain[ "terrain" ];
 
-				uniformsTerrain = THREE.UniformsUtils.clone( terrainShader.uniforms );
+        uniformsTerrain = THREE.UniformsUtils.clone( terrainShader.uniforms );
 
-				uniformsTerrain[ "tNormal" ].texture = normalMap;
-				uniformsTerrain[ "uNormalScale" ].value = 3.5;
+        uniformsTerrain[ "tNormal" ].texture = normalMap;
+        uniformsTerrain[ "uNormalScale" ].value = 3.5;
 
-				uniformsTerrain[ "tDisplacement" ].texture = heightMap;
+        uniformsTerrain[ "tDisplacement" ].texture = heightMap;
 
-				uniformsTerrain[ "tDiffuse1" ].texture = diffuseTexture1;
-				uniformsTerrain[ "tDiffuse2" ].texture = diffuseTexture2;
-				uniformsTerrain[ "tSpecular" ].texture = specularMap;
-				uniformsTerrain[ "tDetail" ].texture = detailTexture;
+        uniformsTerrain[ "tDiffuse1" ].texture = diffuseTexture1;
+        uniformsTerrain[ "tDiffuse2" ].texture = diffuseTexture2;
+        uniformsTerrain[ "tSpecular" ].texture = specularMap;
+        uniformsTerrain[ "tDetail" ].texture = detailTexture;
 
-				uniformsTerrain[ "enableDiffuse1" ].value = true;
-				uniformsTerrain[ "enableDiffuse2" ].value = true;
-				uniformsTerrain[ "enableSpecular" ].value = true;
+        uniformsTerrain[ "enableDiffuse1" ].value = true;
+        uniformsTerrain[ "enableDiffuse2" ].value = true;
+        uniformsTerrain[ "enableSpecular" ].value = true;
 
-				uniformsTerrain[ "uDiffuseColor" ].value.setHex( 0xffffff );
-				uniformsTerrain[ "uSpecularColor" ].value.setHex( 0xffffff );
-				uniformsTerrain[ "uAmbientColor" ].value.setHex( 0x336633 );
+        uniformsTerrain[ "uDiffuseColor" ].value.setHex( 0xffffff );
+        uniformsTerrain[ "uSpecularColor" ].value.setHex( 0xffffff );
+        uniformsTerrain[ "uAmbientColor" ].value.setHex( 0x111111 );
 
-				uniformsTerrain[ "uShininess" ].value = 500;
+        uniformsTerrain[ "uShininess" ].value = 30;
 
-				uniformsTerrain[ "uDisplacementScale" ].value = 475;
+        uniformsTerrain[ "uDisplacementScale" ].value = 500;
 
-				uniformsTerrain[ "uRepeatOverlay" ].value.set( 300, 300 );
+        uniformsTerrain[ "uRepeatOverlay" ].value.set( 600, 600 );
 
-				var params = [
-								[ 'heightmap', 	document.getElementById( 'fragmentShaderNoise' ).textContent, vertexShader, uniformsNoise, false ],
-								[ 'normal', 	normalShader.fragmentShader,  normalShader.vertexShader, uniformsNormal, false ],
-								[ 'terrain', 	terrainShader.fragmentShader, terrainShader.vertexShader, uniformsTerrain, true ]
-							 ];
+        var params = [
+                [ 'heightmap',  document.getElementById( 'fragmentShaderNoise' ).textContent,   vertexShader, uniformsNoise, false ],
+                [ 'normal',   normalShader.fragmentShader,  normalShader.vertexShader, uniformsNormal, false ],
+                [ 'terrain',  terrainShader.fragmentShader, terrainShader.vertexShader, uniformsTerrain, true ]
+               ];
 
-				for( var i = 0; i < params.length; i ++ ) {
+        for( var i = 0; i < params.length; i ++ ) {
 
-					material = new THREE.ShaderMaterial( {
+          material = new THREE.ShaderMaterial( {
 
-						uniforms: 		params[ i ][ 3 ],
-						vertexShader: 	params[ i ][ 2 ],
-						fragmentShader: params[ i ][ 1 ],
-						lights: 		params[ i ][ 4 ],
-						fog: 			true
-						} );
+            uniforms:     params[ i ][ 3 ],
+            vertexShader:   params[ i ][ 2 ],
+            fragmentShader: params[ i ][ 1 ],
+            lights:     params[ i ][ 4 ],
+            fog:      true
+            } );
 
-					mlib[ params[ i ][ 0 ] ] = material;
+          mlib[ params[ i ][ 0 ] ] = material;
 
-				}
+        }
+
 
 
 				var plane = new THREE.PlaneGeometry( SCREEN_WIDTH, SCREEN_HEIGHT );
@@ -503,43 +505,43 @@ n += 0.015625 * abs( snoise( coord * 64.0 ) );
 
 				document.addEventListener( 'keydown', onKeyDown, false );
 
-				// COMPOSER
+				  // COMPOSER
 
-				renderer.autoClear = false;
+        renderer.autoClear = false;
 
-				renderTargetParameters = { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBAFormat, stencilBufer: false };
-				renderTarget = new THREE.WebGLRenderTarget( SCREEN_WIDTH, SCREEN_HEIGHT, renderTargetParameters );
+        renderTargetParameters = { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBAFormat, stencilBufer: false };
+        renderTarget = new THREE.WebGLRenderTarget( SCREEN_WIDTH, SCREEN_HEIGHT, renderTargetParameters );
 
-				effectBloom = new THREE.BloomPass( 0.6 );
-				var effectBleach = new THREE.ShaderPass( THREE.ShaderExtras[ "bleachbypass" ] );
+        effectBloom = new THREE.BloomPass( 0.6 );
+        var effectBleach = new THREE.ShaderPass( THREE.ShaderExtras[ "bleachbypass" ] );
 
-				hblur = new THREE.ShaderPass( THREE.ShaderExtras[ "horizontalTiltShift" ] );
-				vblur = new THREE.ShaderPass( THREE.ShaderExtras[ "verticalTiltShift" ] );
+        hblur = new THREE.ShaderPass( THREE.ShaderExtras[ "horizontalTiltShift" ] );
+        vblur = new THREE.ShaderPass( THREE.ShaderExtras[ "verticalTiltShift" ] );
 
-				var bluriness = 1;
+        var bluriness = 6;
 
-				hblur.uniforms[ 'h' ].value = bluriness / SCREEN_WIDTH;
-				vblur.uniforms[ 'v' ].value = bluriness / SCREEN_HEIGHT;
+        hblur.uniforms[ 'h' ].value = bluriness / SCREEN_WIDTH;
+        vblur.uniforms[ 'v' ].value = bluriness / SCREEN_HEIGHT;
 
-				hblur.uniforms[ 'r' ].value = vblur.uniforms[ 'r' ].value = 0.5;
+        hblur.uniforms[ 'r' ].value = vblur.uniforms[ 'r' ].value = 0.5;
 
-				effectBleach.uniforms[ 'opacity' ].value = 0.65;
+        effectBleach.uniforms[ 'opacity' ].value = 0.65;
 
-				composer = new THREE.EffectComposer( renderer, renderTarget );
+        composer = new THREE.EffectComposer( renderer, renderTarget );
 
-				var renderModel = new THREE.RenderPass( scene, camera );
+        var renderModel = new THREE.RenderPass( scene, camera );
 
-				vblur.renderToScreen = true;
+        vblur.renderToScreen = true;
 
-				composer = new THREE.EffectComposer( renderer, renderTarget );
+        composer = new THREE.EffectComposer( renderer, renderTarget );
 
-				composer.addPass( renderModel );
+        composer.addPass( renderModel );
 
-				composer.addPass( effectBloom );
-				//composer.addPass( effectBleach );
+        composer.addPass( effectBloom );
+        //composer.addPass( effectBleach );
 
-				composer.addPass( hblur );
-				composer.addPass( vblur );
+        composer.addPass( hblur );
+        composer.addPass( vblur );
 
 				// MORPHS
 
@@ -679,54 +681,55 @@ n += 0.015625 * abs( snoise( coord * 64.0 ) );
 
 			//
 
-			function applyShader( shader, texture, target ) {
+	
+      function applyShader( shader, texture, target ) {
 
-				var shaderMaterial = new THREE.ShaderMaterial( {
+        var shaderMaterial = new THREE.ShaderMaterial( {
 
-					fragmentShader: shader.fragmentShader,
-					vertexShader: shader.vertexShader,
-					uniforms: THREE.UniformsUtils.clone( shader.uniforms )
+          fragmentShader: shader.fragmentShader,
+          vertexShader: shader.vertexShader,
+          uniforms: THREE.UniformsUtils.clone( shader.uniforms )
 
-				} );
+        } );
 
-				shaderMaterial.uniforms[ "tDiffuse" ].texture = texture;
+        shaderMaterial.uniforms[ "tDiffuse" ].texture = texture;
 
-				var sceneTmp = new THREE.Scene();
+        var sceneTmp = new THREE.Scene();
 
-				var meshTmp = new THREE.Mesh( new THREE.PlaneGeometry( SCREEN_WIDTH, SCREEN_HEIGHT ), shaderMaterial );
-				meshTmp.position.z = -500;
-				sceneTmp.add( meshTmp );
+        var meshTmp = new THREE.Mesh( new THREE.PlaneGeometry( SCREEN_WIDTH, SCREEN_HEIGHT ), shaderMaterial );
+        meshTmp.position.z = -500;
+        sceneTmp.add( meshTmp );
 
-				renderer.render( sceneTmp, cameraOrtho, target, true );
+        renderer.render( sceneTmp, cameraOrtho, target, true );
 
-			};
+      };
 
-			//
+      //
 
-			function loadTextures() {
+      function loadTextures() {
 
-				textureCounter += 1;
+        textureCounter += 1;
 
-				if ( textureCounter == 3 )	{
+        if ( textureCounter == 3 )  {
 
-					terrain.visible = true;
+          terrain.visible = true;
 
-					document.getElementById( "loading" ).style.display = "none";
+          document.getElementById( "loading" ).style.display = "none";
 
-				}
+        }
 
-			}
+      }
 
-			//
+      //
 
-			function animate() {
+      function animate() {
 
-				requestAnimationFrame( animate );
+        requestAnimationFrame( animate );
 
-				render();
-				stats.update();
+        render();
+        stats.update();
 
-			}
+      }
 
 			function render() {
 
@@ -751,42 +754,43 @@ n += 0.015625 * abs( snoise( coord * 64.0 ) );
 					camControls.update(delta);
 					// controls.update();
 
-					var time = Date.now() * 0.001;
+			          var time = Date.now() * 0.001;
 
-					var fLow = 4.4, fHigh = 15.825;
-// debugger;
-					lightVal = THREE.Math.clamp( lightVal + 0.5 * delta * lightDir, fLow, fHigh );
+          var fLow = 0.4, fHigh = 0.825;
 
-					var valNorm = ( lightVal - fLow ) / ( fHigh - fLow );
+          lightVal = THREE.Math.clamp( lightVal + 0.5 * delta * lightDir, fLow, fHigh );
 
-					var sat = THREE.Math.mapLinear( valNorm, 0, 1, 0.95, 0.25 );
-					scene.fog.color.setHSV( 0.1, sat, lightVal );
+          var valNorm = ( lightVal - fLow ) / ( fHigh - fLow );
 
-					renderer.setClearColor( scene.fog.color, 1 );
+          var sat = THREE.Math.mapLinear( valNorm, 0, 1, 0.95, 0.25 );
+          scene.fog.color.setHSV( 0.1, sat, lightVal );
 
-					spotLight.intensity = THREE.Math.mapLinear( valNorm, 0, 10, 0.1, 1.15 );
-					pointLight.intensity = THREE.Math.mapLinear( valNorm, 0, 10, 0.9, 1.5 );
+          renderer.setClearColor( scene.fog.color, 1 );
 
-					uniformsTerrain[ "uNormalScale" ].value = THREE.Math.mapLinear( valNorm, 0, 1, 0.6, 10.5 );
+          spotLight.intensity = THREE.Math.mapLinear( valNorm, 0, 1, 0.1, 1.15 );
+          pointLight.intensity = THREE.Math.mapLinear( valNorm, 0, 1, 0.9, 1.5 );
 
-					if ( updateNoise ) {
+          uniformsTerrain[ "uNormalScale" ].value = THREE.Math.mapLinear( valNorm, 0, 1, 0.6, 3.5 );
 
-						animDelta = THREE.Math.clamp( animDelta + 0.00075 * animDeltaDir, 0, 0.05 );
-						uniformsNoise[ "time" ].value += delta * animDelta;
+          if ( updateNoise ) {
 
-						// uniformsNoise[ "offset" ].value.x += delta * 0.05;
+            animDelta = THREE.Math.clamp( animDelta + 0.00075 * animDeltaDir, 0, 0.05 );
+            uniformsNoise[ "time" ].value += delta * animDelta;
 
-						// uniformsTerrain[ "uOffset" ].value.x = 4 * uniformsNoise[ "offset" ].value.x;
+            // uniformsNoise[ "offset" ].value.x += delta * 0.05;
 
-						quadTarget.material = mlib[ "heightmap" ];
-						renderer.render( sceneRenderTarget, cameraOrtho, heightMap, true );
+            // uniformsTerrain[ "uOffset" ].value.x = 4 * uniformsNoise[ "offset" ].value.x;
 
-						quadTarget.material = mlib[ "normal" ];
-						renderer.render( sceneRenderTarget, cameraOrtho, normalMap, true );
+            quadTarget.material = mlib[ "heightmap" ];
+            renderer.render( sceneRenderTarget, cameraOrtho, heightMap, true );
 
-						//updateNoise = false;
+            quadTarget.material = mlib[ "normal" ];
+            renderer.render( sceneRenderTarget, cameraOrtho, normalMap, true );
 
-					}
+            //updateNoise = false;
+
+          }
+
 
 
 					for ( var i = 0; i < morphs.length; i ++ ) {
