@@ -1,8 +1,7 @@
 <!DOCTYPE HTML>
-<html lang="en">
+<html ng-app="hover">
 	<head>
 		<title>Balari V - All People's Sky</title>
-		<meta charset="utf-8">
 		<style type="text/css">
 			body {
 				background: #000;
@@ -10,11 +9,11 @@
 				padding: 0;
 				margin: 0;
 				overflow: hidden;
-				font-family: georgia;
+				font-family: courier;
 				font-size:1em;
 				text-align: center;
 			}
-
+			#container { position: absolute; }
 			#info { margin-top: 2em	}
 
 			a { color: #fb0; }
@@ -23,25 +22,33 @@
 			.h { color: #fb0 }
 			.c { display: inline; margin-left: 1em }
 
-			#loading { width: 100%; margin: 2em auto; text-align: center; position: absolute; top: 25em  }
-
+			#loading { width: 100%; margin: 2em auto; text-align: center; position: absolute; top: 25em;  }
+			#debugger { position: relative; top: 50px; }
+			table { border: solid; border-radius: 10px; background-color: white; opacity: .4; color: black; max-width: 100px; }
 			#oldie a { color:#da0 }
-
 			.attribution {
 				font-size: 8pt
 			}
 		</style>
 	</head>
-
 	<body>
 		<div id="container"></div>
-
 		<div id="info">
 			Balari V Simulation
 		</div>
-
 		<div id="loading">Loading...</div>
-
+		<div id="debugger" ng-controller="DebuggerController as mainCtrl">
+			<table>
+		    <thead>
+		        <th></th>
+		        <th>Values</th>
+		    </thead>
+		    <tr ng-repeat="(key, value) in cameraMatrix">
+		        <th>{{key}}</th>
+		        <td>{{value}}</td>
+		    </tr>
+			</table>
+		</div>
 		<div id="footer">
 		<!--	
 		<div class="c">
@@ -70,11 +77,9 @@
 		-->
 		</div>
 		<script src="js/ThreeTerrain.js"></script>
-
 		<script src="js/Detector.js"></script>
 		<script src="js/RequestAnimationFrame.js"></script>
 		<script src="js/Stats.js"></script>
-
 		<script src="js/ShaderTerrain.js"></script>
 		<script src="js/ShaderExtrasTerrain.js"></script>
 		<script src="js/LoadingManager.js"></script>
@@ -84,8 +89,8 @@
 		<script src="js/ImageLoader.js"></script>
 		<!-- // <script src="js/OrbitControls.js"></script>		 -->
 		<script src="js/FirstPersonControls.js"></script>
-		<script src="js/Cache.js"></script>		
-
+		<script src="js/Cache.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
 		<script id="fragmentShaderNoise" type="x-shader/x-fragment">
 
 			//
@@ -159,8 +164,6 @@
 
 				vec4 b0 = vec4( x.xy, y.xy );
 				vec4 b1 = vec4( x.zw, y.zw );
-
-
 				vec4 s0 = floor( b0 ) * 22.0 + 1.0;
 				vec4 s1 = floor( b1 ) * 2.5 + 1.0;
 				vec4 sh = -step( h, vec4( 0.0 ) );
@@ -322,19 +325,19 @@ n += 0.015625 * abs( snoise( coord * 64.0 ) );
 			  
 			  // camera.lookAt(new THREE.Vector3( -50, -50, -1 ));
 
-				// controls = new THREE.TrackballControls( camera );
+				controls = new THREE.TrackballControls( camera );
 				// controls.target.set( -2200, 200, 400 );
 
-				// // controls.rotateSpeed = 1.0;
-				// controls.zoomSpeed = 0;
-				// controls.panSpeed = 0;
-				// controls.noZoom = true;
-				// controls.noPan = true;
+				// controls.rotateSpeed = 1.0;
+				controls.zoomSpeed = 0;
+				controls.panSpeed = 0;
+				controls.noZoom = true;
+				controls.noPan = true;
 
-				// // controls.staticMoving = false;
-				// controls.dynamicDampingFactor = 0.15;
+				// controls.staticMoving = false;
+				controls.dynamicDampingFactor = 0.15;
 
-				// controls.keys = [ 65, 83, 68 ];
+				controls.keys = [ 65, 83, 68 ];
 
 				// LIGHTS
 
@@ -348,8 +351,6 @@ n += 0.015625 * abs( snoise( coord * 64.0 ) );
 				pointLight = new THREE.PointLight( 0xff4400, 1.5 );
 				pointLight.position.set( 0, 0, 0 );
 				scene.add( pointLight );
-
-
 		
         // HEIGHT + NORMAL MAPS
 
@@ -447,8 +448,6 @@ n += 0.015625 * abs( snoise( coord * 64.0 ) );
 
         }
 
-
-
 				var plane = new THREE.PlaneGeometry( SCREEN_WIDTH, SCREEN_HEIGHT );
 
 				quadTarget = new THREE.Mesh( plane, new THREE.MeshBasicMaterial( { color: 0xff0000 } ) );
@@ -484,8 +483,6 @@ n += 0.015625 * abs( snoise( coord * 64.0 ) );
 
 				renderer.gammaInput = true;
 				renderer.gammaOutput = true;
-
-
 				// STATS
 
 				stats = new Stats();
@@ -518,7 +515,7 @@ n += 0.015625 * abs( snoise( coord * 64.0 ) );
         hblur = new THREE.ShaderPass( THREE.ShaderExtras[ "horizontalTiltShift" ] );
         vblur = new THREE.ShaderPass( THREE.ShaderExtras[ "verticalTiltShift" ] );
 
-        var bluriness = 6;
+        var bluriness = 0;
 
         hblur.uniforms[ 'h' ].value = bluriness / SCREEN_WIDTH;
         vblur.uniforms[ 'v' ].value = bluriness / SCREEN_HEIGHT;
@@ -732,7 +729,6 @@ n += 0.015625 * abs( snoise( coord * 64.0 ) );
       }
 
 			function render() {
-
 				var delta = clock.getDelta();
 
 				soundVal = THREE.Math.clamp( soundVal + delta * soundDir, 0, 1 );
@@ -748,13 +744,12 @@ n += 0.015625 * abs( snoise( coord * 64.0 ) );
 
 				}
 
-			
 				if ( terrain.visible ) {
 
 					camControls.update(delta);
-					// controls.update();
+					controls.update()
 
-			          var time = Date.now() * 0.001;
+			    var time = Date.now() * 0.001;
 
           var fLow = 0.4, fHigh = 0.825;
 
@@ -770,6 +765,10 @@ n += 0.015625 * abs( snoise( coord * 64.0 ) );
           spotLight.intensity = THREE.Math.mapLinear( valNorm, 0, 1, 0.1, 1.15 );
           pointLight.intensity = THREE.Math.mapLinear( valNorm, 0, 1, 0.9, 1.5 );
 
+          morphs[1].position.set( camera.position.x, camera.position.y, camera.position.z )
+          // camera.position.set( morphs[1].position.x, morphs[1].position.y + 150, morphs[1].position.z )
+          // camera.rotation.set( morphs[1].rotation.x, morphs[1].rotation.y + 150, morphs[1].rotation.z  )
+          // camera.lookAt( morphs[1].position );
           uniformsTerrain[ "uNormalScale" ].value = THREE.Math.mapLinear( valNorm, 0, 1, 0.6, 3.5 );
 
           if ( updateNoise ) {
@@ -790,8 +789,6 @@ n += 0.015625 * abs( snoise( coord * 64.0 ) );
             //updateNoise = false;
 
           }
-
-
 
 					for ( var i = 0; i < morphs.length; i ++ ) {
 
@@ -841,7 +838,14 @@ n += 0.015625 * abs( snoise( coord * 64.0 ) );
 
 			}
 
-		</script>
+		// ANGULAR
+		angular.module('hover', [])
+			.controller('DebuggerController', ['$scope', function($scope) {
+				$scope.cameraMatrix = camera.rotation;
 
+				document.addEventListener( 'keydown', function(){$scope.$apply();}, false );
+
+			}]);
+		</script>
 	</body>
 </html>
